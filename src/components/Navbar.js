@@ -1,11 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const Navbar = ({ authenticated, user, onLogin, onLogout }) => {
-    const isAdmin = user?.role === "ADMIN";
-    const isPatient = !authenticated || user?.role === "PATIENT"; // Default to "PATIENT" if unauthenticated
+const Navbar = ({ authenticated, onLogin, onLogout }) => {
 
-    console.log("Navbar Props:", { authenticated, user });
+    console.log("Navbar Props:", { authenticated });
 
     return (
         <nav
@@ -18,7 +16,7 @@ const Navbar = ({ authenticated, user, onLogin, onLogout }) => {
                 alignItems: "center",
             }}
         >
-            {/* Application Title */}
+            {/* Application Title */}å
             <div>
                 <Link
                     to="/"
@@ -38,32 +36,28 @@ const Navbar = ({ authenticated, user, onLogin, onLogout }) => {
                 {authenticated ? (
                     <>
                         <span style={{ marginRight: "15px", fontSize: "16px" }}>
-                            Welcome, {user?.name || "Guest"}
+                            Welcome, Doctor
                         </span>
-                        {isAdmin && (
-                            <>
-                                <Link
-                                    to="/admin/admin-dashboard"
-                                    style={{
-                                        color: "#007bff",
-                                        textDecoration: "none",
-                                        marginRight: "15px",
-                                    }}
-                                >
-                                    Admin Dashboard
-                                </Link>
-                                <Link
-                                    to="/admin/doctor-management"
-                                    style={{
-                                        color: "#007bff",
-                                        textDecoration: "none",
-                                        marginRight: "15px",
-                                    }}
-                                >
-                                    Doctor Management
-                                </Link>
-                            </>
-                        )}
+                        <Link
+                            to="/admin/admin-dashboard"
+                            style={{
+                                color: "#007bff",
+                                textDecoration: "none",
+                                marginRight: "15px",
+                            }}
+                        >
+                            Admin Dashboard
+                        </Link>
+                        <Link
+                            to="/admin/doctor-management"
+                            style={{
+                                color: "#007bff",
+                                textDecoration: "none",
+                                marginRight: "15px",
+                            }}
+                        >
+                            Doctor Management
+                        </Link>
                         <button
                             style={{
                                 background: "none",
@@ -79,41 +73,36 @@ const Navbar = ({ authenticated, user, onLogin, onLogout }) => {
                     </>
                 ) : (
                     <>
-                        {/* Patient Links */}
-                        {isPatient && (
-                            <>
-                                <Link
-                                    to="/"
-                                    style={{
-                                        color: "#fff",
-                                        textDecoration: "none",
-                                        marginRight: "15px",
-                                    }}
-                                >
-                                    Patient Dashboard
-                                </Link>
-                                <Link
-                                    to="/list"
-                                    style={{
-                                        color: "#fff",
-                                        textDecoration: "none",
-                                        marginRight: "15px",
-                                    }}
-                                >
-                                    Patient Appointments List
-                                </Link>
-                                <Link
-                                    to="/create"
-                                    style={{
-                                        color: "#fff",
-                                        textDecoration: "none",
-                                        marginRight: "15px",
-                                    }}
-                                >
-                                    Patient Appointment Creation
-                                </Link>
-                            </>
-                        )}
+                        <Link
+                            to="/"
+                            style={{
+                                color: "#fff",
+                                textDecoration: "none",
+                                marginRight: "15px",
+                            }}
+                        >
+                            Patient Dashboard
+                        </Link>
+                        <Link
+                            to="/list"
+                            style={{
+                                color: "#fff",
+                                textDecoration: "none",
+                                marginRight: "15px",
+                            }}
+                        >
+                            Patient Appointments List
+                        </Link>
+                        <Link
+                            to="/create"
+                            style={{
+                                color: "#fff",
+                                textDecoration: "none",
+                                marginRight: "15px",
+                            }}
+                        >
+                            Patient Appointment Creation
+                        </Link>
                         <button
                             style={{
                                 background: "#007bff",

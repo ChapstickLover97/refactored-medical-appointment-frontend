@@ -39,14 +39,5 @@
       "last 1 safari version"
     ]
   },
-  "proxy": {
-    "/api": {
-      "target": "http://localhost:8080",
-      "changeOrigin": true
-    },
-    "/oauth2": {
-      "target": "http://localhost:8080",
-      "changeOrigin": true
-    }
-  }
+  "proxy": "http://localhost:8080"
 }
