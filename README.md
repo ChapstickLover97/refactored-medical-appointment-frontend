@@ -1,70 +1,102 @@
-# Getting Started with Create React App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Medical Appointment System Frontend
 
-## Available Scripts
+This project is the React-based frontend for the Medical Appointment System. It provides a user interface for managing appointments, doctors, and patient-related functionalities. The frontend interacts with the backend API to fetch, display, and update data.
 
-In the project directory, you can run:
+## Features
 
-### `npm start`
+- Dynamic UI for interacting with backend services.
+- Separate routes for `Patient` and `Admin` workflows.
+- Integration with a RESTful API for real-time data operations.
+- Basic error handling for API failures.
+- Responsive design for improved user experience.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Technologies Used
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- React 18
+- JavaScript (ES6+)
+- React Router for navigation
+- Fetch API for backend communication
+- CSS for styling
 
-### `npm test`
+## Setup Instructions
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd medical_appointment_system_frontend
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the development server:
+   ```bash
+   npm start
+   ```
+4. Access the application at `http://localhost:3000`.
 
-### `npm run build`
+## File Structure
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- **components/Navbar.js**: Navigation bar shared across the application.
+- **pages/admin**: Contains all admin-related components, such as Doctor Management and Appointment List.
+- **pages/patient**: Contains patient-related components like Appointment Creation and Dashboard.
+- **App.js**: The main application file managing routes and rendering components.
+- **AuthenticatedRoutes.js**: Handles route protection logic.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Strengths
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. **Separation of Concerns**: Code is modular, with distinct directories for admin and patient pages.
+2. **Dynamic Rendering**: Components dynamically update based on backend data.
+3. **CORS-Ready Integration**: Configured to communicate with the backend seamlessly.
+4. **Responsive Design**: The layout is designed to adapt to various screen sizes.
 
-### `npm run eject`
+## Weaknesses
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+1. **Error Handling**: Current error handling is basic and lacks user-friendly error messages.
+2. **Code Complexity**: Certain components, such as `MOCKDoctorManagement.js`, can be optimized for readability.
+3. **Authentication Dependencies**: Earlier reliance on Okta caused issues during integration; this is being refactored.
+4. **State Management**: State logic can be simplified using a state management library like Redux.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Core Components
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Navbar.js
+- Central navigation hub for the app.
+- Contains links to both patient and admin workflows.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Patient Pages
+1. **PatientAppointmentList.js**: Displays a list of patient appointments with delete functionality.
+2. **PatientAppointmentCreation.js**: Allows patients to create appointments by selecting a doctor and specialization.
 
-## Learn More
+### Admin Pages
+1. **AdminAppointmentList.js**: Displays all appointments for admin review and management.
+2. **DoctorManagement.js**: Provides CRUD operations for managing doctors.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Key Routes
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+| Path              | Component                    | Description                                |
+|-------------------|------------------------------|--------------------------------------------|
+| `/`               | HomePage                     | Landing page                               |
+| `/patient`        | PatientDashboard             | Dashboard for patients                     |
+| `/admin`          | AdminDashboard               | Dashboard for admins                       |
+| `/login`          | LoginPage                    | Handles user login                         |
+| `/admin/doctors`  | MOCKDoctorManagement         | Manage doctors (CRUD operations)          |
 
-### Code Splitting
+## Limitations
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+1. **Mock Pages**: Some features, like Doctor Management, are implemented as mock pages and do not fully integrate with backend workflows.
+2. **Testing**: Limited testing coverage; needs additional unit and integration tests.
+3. **Styling**: Basic styling is in place, but there is room for improvement in aesthetics and accessibility.
 
-### Analyzing the Bundle Size
+## Future Improvements
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+- **Enhanced Error Handling**: Add comprehensive user-friendly error messages.
+- **State Optimization**: Integrate Redux for more scalable state management.
+- **Testing Framework**: Introduce testing with Jest or Cypress.
+- **Design Enhancements**: Improve UI/UX with advanced CSS or libraries like Tailwind CSS.
 
-### Making a Progressive Web App
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## License
 
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+This project is licensed under the MIT License. See the LICENSE file for details.
