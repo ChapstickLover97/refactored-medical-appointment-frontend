@@ -1,76 +1,116 @@
 import React, { useState, useEffect } from "react";
 
-const BASE_URL = "http://localhost:8080/api";
+const BASE_URL = "http://localhost:8080/api"; // Ensure this URL is correct
 
 const PatientAppointmentCreation = () => {
     const [specializations, setSpecializations] = useState([]);
     const [doctors, setDoctors] = useState([]);
     const [selectedSpecialization, setSelectedSpecialization] = useState("");
+    const [selectedDoctor, setSelectedDoctor] = useState("");
+    const [patientId, setPatientId] = useState("");
+    const [date, setDate] = useState("");
+    const [time, setTime] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
+    const [error, setError] = useState("");
 
-    // Fetch all specializations on component mount
+    // Fetch specializations on component mount
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchSpecializations = async () => {
             try {
-                if (!selectedSpecialization === "" ) {
-                    // Fetch doctors when a specialization is selected
-                    const doctorsResponse = await fetch(`${BASE_URL}/doctors/specialization/${selectedSpecialization}`, {
-                        credentials: "include"
-                    });
-                    console.log("response:", doctorsResponse);
-                    const doctorsData = await doctorsResponse.json();
-                    console.log(doctorsData);
-                    setDoctors(doctorsData);
-                } else {
-                    // Fetch specializations if no specialization is selected
-                    const specializationsResponse = await fetch(`${BASE_URL}/specializations/getall`, {
-                        credentials: "include"
-                    });
-                    console.log("response:", specializationsResponse);
-                    const specializationsData = await specializationsResponse.json();
-                    setSpecializations(specializationsData);
+                const response = await fetch(`${BASE_URL}/specializations`, {
+                    credentials: "include",
+                });
+                if (!response.ok) {
+                    throw new Error("Failed to fetch specializations.");
                 }
+                const data = await response.json();
+                setSpecializations(data);
+                console.log("Specializations fetched:", data);
             } catch (error) {
-                console.error("Error fetching data:", error);
+                console.error("Error fetching specializations:", error);
             }
         };
-    
-        fetchData();
+
+        fetchSpecializations();
+    }, []);
+
+    // Fetch doctors when a specialization is selected
+    useEffect(() => {
+        if (!selectedSpecialization) {
+            setDoctors([]);
+            return;
+        }
+
+        const fetchDoctors = async () => {
+            try {
+                const response = await fetch(`${BASE_URL}/doctors/specialization/${selectedSpecialization}`, {
+                    credentials: "include",
+                });
+                if (!response.ok) throw new Error("Failed to fetch doctors.");
+                const data = await response.json();
+                setDoctors(data);
+                console.log("Doctors fetched:", data);
+            } catch (error) {
+                console.error("Error fetching doctors:", error);
+            }
+        };
+
+        fetchDoctors();
     }, [selectedSpecialization]);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setSuccessMessage("");
+        setError("");
+
+        if (!patientId || !selectedSpecialization || !selectedDoctor || !date || !time) {
+            setError("Please fill out all fields.");
+            return;
+        }
+
+        const appointmentData = {
+            patientId,
+            specializationId: selectedSpecialization,
+            doctorId: selectedDoctor,
+            date,
+            time,
+        };
+
+        try {
+            const response = await fetch(`${BASE_URL}/appointments`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(appointmentData),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to create appointment.");
+            }
+
+            const data = await response.json();
+            setSuccessMessage(`Appointment created successfully with ID: ${data.id}`);
+        } catch (error) {
+            console.error("Error creating appointment:", error);
+            setError("Failed to create appointment. Please try again.");
+        }
+    };
 
     return (
         <div style={styles.page}>
             <h1>Create Appointment</h1>
-            <form style={styles.form}>
-                {/* First Name */}
+            <form style={styles.form} onSubmit={handleSubmit}>
+                {/* Patient ID */}
                 <div style={styles.inputGroup}>
-                    <label htmlFor="firstName" style={styles.label}>First Name:</label>
+                    <label htmlFor="patientId" style={styles.label}>Patient ID:</label>
                     <input
                         type="text"
-                        id="firstName"
-                        name="firstName"
+                        id="patientId"
+                        name="patientId"
                         style={styles.input}
-                    />
-                </div>
-
-                {/* Last Name */}
-                <div style={styles.inputGroup}>
-                    <label htmlFor="lastName" style={styles.label}>Last Name:</label>
-                    <input
-                        type="text"
-                        id="lastName"
-                        name="lastName"
-                        style={styles.input}
-                    />
-                </div>
-
-                {/* Date of Birth */}
-                <div style={styles.inputGroup}>
-                    <label htmlFor="dateOfBirth" style={styles.label}>Date of Birth:</label>
-                    <input
-                        type="date"
-                        id="dateOfBirth"
-                        name="dateOfBirth"
-                        style={styles.input}
+                        value={patientId}
+                        onChange={(e) => setPatientId(e.target.value)}
                     />
                 </div>
 
@@ -96,7 +136,13 @@ const PatientAppointmentCreation = () => {
                 {/* Doctor Dropdown */}
                 <div style={styles.inputGroup}>
                     <label htmlFor="doctor" style={styles.label}>Choose Doctor:</label>
-                    <select id="doctor" name="doctor" style={styles.input}>
+                    <select
+                        id="doctor"
+                        name="doctor"
+                        style={styles.input}
+                        value={selectedDoctor}
+                        onChange={(e) => setSelectedDoctor(e.target.value)}
+                    >
                         <option value="">Select a Doctor</option>
                         {doctors.map((doctor) => (
                             <option key={doctor.id} value={doctor.id}>
@@ -114,6 +160,8 @@ const PatientAppointmentCreation = () => {
                         id="date"
                         name="date"
                         style={styles.input}
+                        value={date}
+                        onChange={(e) => setDate(e.target.value)}
                     />
                 </div>
 
@@ -125,6 +173,8 @@ const PatientAppointmentCreation = () => {
                         id="time"
                         name="time"
                         style={styles.input}
+                        value={time}
+                        onChange={(e) => setTime(e.target.value)}
                     />
                 </div>
 
@@ -135,6 +185,12 @@ const PatientAppointmentCreation = () => {
                 >
                     Submit
                 </button>
+
+                {/* Success Message */}
+                {successMessage && <p style={styles.success}>{successMessage}</p>}
+
+                {/* Error Message */}
+                {error && <p style={styles.error}>{error}</p>}
             </form>
         </div>
     );
@@ -143,15 +199,21 @@ const PatientAppointmentCreation = () => {
 const styles = {
     page: {
         padding: "2rem",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
     },
     form: {
         display: "flex",
         flexDirection: "column",
         gap: "1rem",
+        width: "100%",
+        maxWidth: "600px",
     },
     inputGroup: {
         display: "flex",
         flexDirection: "column",
+        marginBottom: "1rem",
     },
     label: {
         fontWeight: "bold",
@@ -163,7 +225,6 @@ const styles = {
         borderRadius: "4px",
     },
     submitButton: {
-        marginTop: "1rem",
         padding: "0.75rem",
         backgroundColor: "#007bff",
         color: "#fff",
@@ -171,7 +232,15 @@ const styles = {
         borderRadius: "4px",
         fontSize: "16px",
         cursor: "pointer",
-        alignSelf: "center",
+    },
+    success: {
+        color: "green",
+        marginTop: "1rem",
+        fontWeight: "bold",
+    },
+    error: {
+        color: "red",
+        marginTop: "1rem",
     },
 };
 

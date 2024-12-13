@@ -5,106 +5,120 @@ import AuthenticatedRoutes from "./routes/AuthenticatedRoutes";
 import UnauthenticatedRoutes from "./routes/UnauthenticatedRoutes";
 import { useCookies } from "react-cookie";
 
-// Utility function to get CSRF token from cookies
-const getCsrfToken = () => {
-    const csrfCookie = document.cookie.split("; ").find((row) => row.startsWith("XSRF-TOKEN="));
-    if (!csrfCookie) {
-        console.warn("[getCsrfToken] CSRF token not found in cookies.");
-        return null;
+// Utility: Parse URL for tokens
+const parseTokenFromUrl = () => {
+    // console.debug("[parseTokenFromUrl] Checking URL for tokens...");
+    // const params = new URLSearchParams(window.location.hash.substring(1)); // Read tokens from URL hash
+    // const idToken = params.get("id_token");
+    // if (idToken) {
+    //     console.debug("[parseTokenFromUrl] ID Token found in URL:", idToken);
+    //     return idToken;
+    // }
+    // console.warn("[parseTokenFromUrl] No ID Token found in URL.");
+    // return null;
+};
+
+// Utility: Save token in cookies/localStorage
+const saveToken = (idToken) => {
+    console.debug("[saveToken] Storing ID Token...");
+    // Save in cookies
+    document.cookie = `id_token=${idToken}; path=/; secure`;
+
+    // Optionally save in localStorage for redundancy
+    localStorage.setItem("id_token", idToken);
+};
+
+// Utility: Retrieve token from cookies/localStorage
+const getIdToken = () => {
+    console.debug("[getIdToken] Retrieving ID Token...");
+    const idTokenCookie = document.cookie.split("; ").find((row) => row.startsWith("id_token="));
+    if (idTokenCookie) {
+        const token = idTokenCookie.split("=")[1];
+        console.debug("[getIdToken] ID Token found in cookies:", token);
+        return token;
     }
-    const token = csrfCookie.split("=")[1];
-    console.debug("[getCsrfToken] CSRF token extracted:", token);
-    return token;
+
+    const idTokenLocalStorage = localStorage.getItem("id_token");
+    if (idTokenLocalStorage) {
+        console.debug("[getIdToken] ID Token found in localStorage:", idTokenLocalStorage);
+        return idTokenLocalStorage;
+    }
+
+    console.warn("[getIdToken] ID Token not found.");
+    return null;
 };
 
 const App = () => {
     const [authenticated, setAuthenticated] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [cookies] = useCookies(["XSRF-TOKEN"]);
 
-    // Reset authentication state
-    const resetAuthState = () => {
-        console.debug("Resetting authentication state.");
-        setAuthenticated(false);
-    };
-
-    // Check authentication status
     useEffect(() => {
-        const checkAuthStatus = async () => {
-            setLoading(true);
-            console.debug("[checkAuthStatus] Starting authentication check...");
-            try {
-                const csrfToken = cookies["XSRF-TOKEN"];
-                console.debug("[checkAuthStatus] CSRF Token retrieved from cookies:", csrfToken);
+        const initializeAuthentication = async () => {
+            console.debug("[initializeAuthentication] Starting authentication process...");
 
-                const response = await fetch("/api/auth/status", {
-                    credentials: "include",
-                    headers: csrfToken ? { "X-XSRF-TOKEN": csrfToken } : {},
-                });
+            // Step 1: Check if token is in URL after login
+            const idToken = parseTokenFromUrl();
+            if (idToken) {
+                saveToken(idToken); // Save the token for future use
+                setAuthenticated(true);
+                // Clear the URL hash to clean up
+                window.location.hash = "";
+                console.debug("[initializeAuthentication] Token stored and URL cleaned.");
+            } else {
+                // Step 2: Check backend authentication status
+                try {
+                    const csrfToken = cookies["XSRF-TOKEN"];
+                    const response = await fetch("/api/auth/status", {
+                        credentials: "include",
+                        headers: csrfToken ? { "X-XSRF-TOKEN": csrfToken } : {},
+                    });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    console.debug("[checkAuthStatus] Response Data:", data);
-
-                    if (data.authenticated) {
-                        console.debug("[checkAuthStatus] Authentication successful!");
-                        setAuthenticated(true);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.authenticated) {
+                            console.debug("[initializeAuthentication] Backend authenticated user.");
+                            setAuthenticated(true);
+                        } else {
+                            console.warn("[initializeAuthentication] Backend says user is not authenticated.");
+                        }
                     } else {
-                        console.warn("[checkAuthStatus] User is not authenticated.");
-                        resetAuthState();
+                        console.error("[initializeAuthentication] Failed to fetch auth status:", response.statusText);
                     }
-                } else {
-                    console.error("[checkAuthStatus] Response status not OK:", response.status, response.statusText);
-                    resetAuthState();
+                } catch (error) {
+                    console.error("[initializeAuthentication] Error during auth status check:", error);
                 }
-            } catch (error) {
-                console.error("[checkAuthStatus] Error during fetch:", error);
-                resetAuthState();
-            } finally {
-                setLoading(false);
             }
+
+            setLoading(false);
         };
 
-        checkAuthStatus();
+        initializeAuthentication();
     }, [cookies]);
 
     // Login function
     const login = () => {
-        const port = window.location.port === "3000" ? ":8080" : window.location.port ? `:${window.location.port}` : "";
-        window.location.href = `//${window.location.hostname}${port}/oauth2/authorization/okta`;
-    };
+        window.location.href = `/oauth2/authorization/okta`;
+      };
 
     // Logout function
-    const logout = async () => {
-        const csrfToken = getCsrfToken();
-        if (!csrfToken) {
-            console.error("CSRF token not found. Logout may fail.");
-            return;
-        }
+    const logout = () => {
+        const csrfToken = document.cookie.split('; ').find(row => row.startsWith('XSRF-TOKEN=')).split('=')[1];
+        fetch('http://localhost:8080/api/logout', {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-Token': csrfToken
+          }
+        })
+          .then((res) => res.json())
+          .then((response) => {
+            window.location.href = `${response.logoutUrl}?id_token_hint=${response.idToken}&post_logout_redirect_uri=${window.location.origin}`;
+          })
+         
+      };
 
-        try {
-            const response = await fetch("/api/logout", {
-                method: "POST",
-                credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-XSRF-TOKEN": csrfToken,
-                },
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                window.location.href = `${data.logoutUrl}?id_token_hint=${data.idToken}&post_logout_redirect_uri=${window.location.origin}`;
-                resetAuthState();
-            } else {
-                throw new Error("Logout failed with status: " + response.status);
-            }
-        } catch (error) {
-            console.error("Logout failed:", error);
-        }
-    };
-
-    // Render a loading screen while checking authentication status
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -113,14 +127,11 @@ const App = () => {
         <Router>
             <Navbar authenticated={authenticated} onLogin={login} onLogout={logout} />
             <Routes>
-                {/* Routes for authenticated users */}
                 {authenticated ? (
                     <Route path="/*" element={<AuthenticatedRoutes />} />
                 ) : (
-                    // Routes for unauthenticated users
                     <Route path="/*" element={<UnauthenticatedRoutes />} />
                 )}
-                {/* Catch-all route for unexpected cases */}
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </Router>

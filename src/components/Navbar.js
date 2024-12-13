@@ -16,7 +16,7 @@ const Navbar = ({ authenticated, onLogin, onLogout }) => {
                 alignItems: "center",
             }}
         >
-            {/* Application Title */}å
+            {/* Application Title */}
             <div>
                 <Link
                     to="/"
@@ -84,14 +84,14 @@ const Navbar = ({ authenticated, onLogin, onLogout }) => {
                             Patient Dashboard
                         </Link>
                         <Link
-                            to="/list"
+                            to="/patient-management"
                             style={{
                                 color: "#fff",
                                 textDecoration: "none",
                                 marginRight: "15px",
                             }}
                         >
-                            Patient Appointments List
+                            Patient Management
                         </Link>
                         <Link
                             to="/create"
@@ -102,6 +102,27 @@ const Navbar = ({ authenticated, onLogin, onLogout }) => {
                             }}
                         >
                             Patient Appointment Creation
+                        </Link>
+                        <Link
+                            to="/list"
+                            style={{
+                                color: "#fff",
+                                textDecoration: "none",
+                                marginRight: "15px",
+                            }}
+                        >
+                            Patient Appointment List
+                        </Link>
+                        {/* New Doctor Management Link */}
+                        <Link
+                            to="/doctor-management"
+                            style={{
+                                color: "#fff",
+                                textDecoration: "none",
+                                marginRight: "15px",
+                            }}
+                        >
+                            MOCK Doctor Management
                         </Link>
                         <button
                             style={{
